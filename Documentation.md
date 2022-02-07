@@ -54,7 +54,7 @@ The return value is a list of named tuples `[(Socket(mac=..., ip=...)', ...]` or
 ***
 
 ### **switch_state(*socket_*)**
-*Return the swicht state of a socket (`'on'` or `'off'`)*
+*Return the switch state of a socket (`'on'` or `'off'`)*
 - **socket_**: A tuple of (MAC address, IP address) of the Wi-Fi socket.
 ***
  
@@ -208,7 +208,7 @@ Please consider them 'PRIVAT'.
 - **ip**: The IP address of the device, given as dot-separated string.  
 Note that the IP address of a socket may change (when dynamically assigned). Use `find_sockets(mac)` to get the IP address of a certain device.
 - **command**: A command string in hex format (space-separated or not).
-- **broadcast**: Send to all devices in the local wireless network. Default is `False` which means that commands are usually send to a given device, defined by it's IP.
+- **broadcast**: Send to all devices in the local wireless network. Default is `False` which means that commands are usually send to a given device, defined by its IP.
 *** 
 
 ### **send_and_forget(*ip, command, broadcast=False*)**
