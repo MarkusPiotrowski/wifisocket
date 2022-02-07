@@ -41,14 +41,10 @@ In this case, you will only receive *one* tuple (`Socket(mac=xxxx, ip=....)`) in
 Sending commands
 ----------------
 Most commands require the MAC and IP address of the addressed socket as the first positional argument in the form of a tuple `(mac, ip)`.
-<dl>
-<dt>socket\_</dt>
-<dd>The tuple `(mac, ip)`</dd>
-<dt>mac</dt>
-<dd>Is the MAC address of the socket to which the command is sent.  The MAC will be encoded within the command. It is given without colons but may be separated by spaces. `'00010203abcd'` and `'00 01 02 03 ab cd'` are both valid formats.</dd>
-<dt>ip</dt>
-<dd>Is the IP address which is assigned to the addressed socket in the local network. The IP address is required to send the command to the correct socket. `ip` is given in dot separated format, e.g., `'192.168.0.15'`.</dd>
-</dl>
+
+- **socket_**: The tuple `(mac, ip)`.
+- **mac**: Is the MAC address of the socket to which the command is sent. The MAC will be encoded within the command. It is given without colons but may be separated by spaces. `'00010203abcd'` and `'00 01 02 03 ab cd'` are both valid formats.
+- **ip**: Is the IP address which is assigned to the addressed socket in the local network. The IP address is required to send the command to the correct socket. `ip` is given in dot separated format, e.g., `'192.168.0.15'`.
 
 Since MAC and IP addresses of a device can be retrieved as a tuple by `find_socket()`, a simple script to switch a socket on could look like this:
 
@@ -71,52 +67,46 @@ Some command parameters are often the same, independent of the socket which is b
     >>> ws.device = ws.DIS_120  # Aldi Easy Home Wi-Fi adapter
 
 These are the default global variables:
-<dl>
-<dt>packet</dt>
-<dd>Each command contains a packet number (counting up) and sockets will only accept commands that have a higher packet number than the command that was received before. However, the packet number can simply be set to `'FF FF'`, which is the highest value, because the socket will then start to count from the beginning. Therefore, `packet` defaults to `'FF FF'`.
+
+- **packet**: Each command contains a packet number (counting up) and sockets will only accept commands that have a higher packet number than the command that was received before. However, the packet number can simply be set to `'FF FF'`, which is the highest value, because the socket will then start to count from the beginning. Therefore, `packet` defaults to `'FF FF'`.  
 So much for the story being told. In fact, this is nonsense, and the packet number can be any value between `'00 00'` and `'FF FF'` without any socket being bothered by it.
-</dd>
-<dt>device</dt>
-<dd>Is a hex code containing the company code, device code and authentication code. E.g., for Silvercrest's SWS-A1 sockets (sold by Lidl) this would be 'C1 11 71 50'. `device` defaults to `SWS_A1` (='C1 11 71 50').</dd>
-<dt>udp_port</dt>
-<dd>The UDP port for sending commands and receiving responses. Default port: 8530.</dd>
-<dt>timeout</dt>
-<dd>The time after which a command stops waiting for a response. A time-out is usually a sign that a command was not received or not understood. The function then returns `'Timeout'`. Default: 2 seconds.</dd>
-<dt>repeat</dt>
-<dd>How often is a command repeated in case that no valid response is received. Default: 3.</dd>
-</dl>
+- **device**: Is a hex code containing the company code, device code and authentication code. E.g., for Silvercrest's SWS-A1 sockets (sold by Lidl) this would be 'C1 11 71 50'. `device` defaults to `SWS_A1` (='C1 11 71 50').
+- **udp_port**: The UDP port for sending commands and receiving responses. Default port: 8530.
+- **timeout**: The time after which a command stops waiting for a response. A time-out is usually a sign that a command was not received or not understood. The function then returns `'Timeout'`. Default: 2 seconds.
+- **repeat**: How often is a command repeated in case that no valid response is received. Default: 3.
+
 
 Available commands
 ------------------
 Use these commands to control your sockets:
-<dl>
-<dt>switch(socket, on_off)</dt>
-<dd>To switch a socket 'on' or 'off'.</dd>
-<dt>switch_state(socket)</dt>
-<dd>Returns 'on' or 'off'.</dd>
-<dt>switch\_slave(socket, slave, on_off)</dt>
-<dd>To switch a radio-controlled slave socket. Not tested!</dd>
-<dt>timer\_query(socket, which='all', delta_time=None)</dt>
-<dd>: Returns data about the programmed timers of a socket.</dd>
-<dt>set\_timer(socket, timer, active, repeat, time, switch, delta_time=None)</dt>
-<dd>To program a timer.</dd>
-<dt>set\_countdown(socket, time, switch, delta_time=None)</dt>
-<dd>To program a countdown.</dd>
-<dt>activate\_timer(socket, timer, activate=True)</dt>
-<dd>To activate or deactivate a programmed timer.</dd>
-<dt>delete\_timer(socket, timer)</dt>
-<dd>To delete a programmed timer.</dd>
-<dt>absence_mode_query(socket)</dt>
-<dd>Returns data about absence mode.</dd>
-<dt>set_absence_mode(socket, active, from, to)</dt>
-<dd>To program absence mode.</dd>
-<dt>delete_absence_mode(socket)</dt>
-<dd>To delete absence mode.</dd>
-</dl>
+
+- **switch(*socket, on_off*)**  
+To switch a socket 'on' or 'off'.
+- **switch_state(*socket*)**  
+Returns 'on' or 'off'.
+- **switch_slave(*socket, slave, on_off*)**  
+To switch a radio-controlled slave socket. Not tested!
+- **timer_query(*socket, which='all', delta_time=None*)**  
+Returns data about the programmed timers of a socket.
+- **set_timer(*socket, timer, active, repeat, time, switch, delta_time=None*)**  
+To program a timer.
+- **set_countdown(*socket, time, switch, delta_time=None*)**  
+To program a countdown.
+- **activate_timer(*socket, timer, activate=True*)**  
+To activate or deactivate a programmed timer.
+- **delete_timer(*socket, timer*)**  
+To delete a programmed timer.
+- **absence_mode_query(*socket*)**  
+Returns data about absence mode.
+- **set_absence_mode(*socket, active, from, to*)**  
+To program absence mode.
+- **delete_absence_mode(*socket*)**  
+To delete absence mode.
+
 
 Final notes
 -----------
-UDP communication is error-prone, therefore you should always check if things are as you expect them to be. E.g. a `find_sockets()` call may not necessarily return a list of all connected sockets. The above shown series of commands:
+UDP communication is error-prone, therefore you should always check if things are as you expect them to be. E.g., a `find_sockets()` call may not necessarily return a list of all connected sockets. The above shown series of commands:
 
     >>> import wifisocket as ws
     >>> my_sockets = ws.find_sockets()
