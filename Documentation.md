@@ -59,7 +59,7 @@ The return value is a list of named tuples `[(Socket(mac=..., ip=...)', ...]` or
 ***
  
 ### **switch_slave(*socket_, slave, on_off*)**
-*Switch the slave socket on or off.*
+*Switch the slave socket on or off.*  
 To switch the radio-controlled 433 Mhz slave sockets (e.g., ALDI Easy Home kit)
  >EXPERIMENTAL! I haven't tested this.
 
