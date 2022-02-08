@@ -358,8 +358,8 @@ def timer_query(socket_, which='all', delta_time=None):
         'free': non-programmed timer slots, will only return a list of the
         free timer numbers.
     :delta_time: Difference between the socket's time and the local time.
-        The modul assumes that the sockets are internally running UCT (GMT)
-        time. The default setting corrects between your local time and UCT.
+        The modul assumes that the sockets are internally running UTC (GMT)
+        time. The default setting corrects between your local time and UTC.
         If this is not correct, you can apply a different time difference
         (in seconds).
 
@@ -376,7 +376,7 @@ def timer_query(socket_, which='all', delta_time=None):
         `'1111111'`: repeat every day
         `'0000000'`: never repeat, just switch today
     :time: When to switch, in 24-hour format (hh:mm). Note: This modul assumes
-        that the sockest are using UCT internally and corrects this to local
+        that the sockest are using UTC internally and corrects this to local
         time. If this is not correct, use the 'time_delta' argument (see above).
     :switch: What to do. Switch `'on'` or `'off'`.
     """
@@ -446,8 +446,8 @@ def set_timer(socket_, timer, active, repeat, time_, switch, delta_time=None):
     :time_: Time in hh:mm format, e.g., `'13:25'`.
     :switch: `'on'` or `'off'`
     :delta_time: Difference between the socket's time and the local time.
-        The modul assumes that the sockets are internally running UCT (GMT)
-        time. The default setting corrects between your local time and UCT.
+        The modul assumes that the sockets are internally running UTC (GMT)
+        time. The default setting corrects between your local time and UTC.
         If this is not correct, you can apply a different time difference
         (in seconds).
     """
@@ -495,8 +495,8 @@ def set_countdown(socket_, time_, switch, delta_time=None):
     :time_: Countdown time in hh:mm format, e.g., `'01:30'`.
     :switch: `'on'` or `'off'`
     :delta_time: Difference between the socket's time and the local time.
-        The modul assumes that the sockets are internally running UCT (GMT)
-        time. The default setting corrects between your local time and UCT.
+        The modul assumes that the sockets are internally running UTC (GMT)
+        time. The default setting corrects between your local time and UTC.
         If this is not correct, you can apply a different time difference
         (in seconds).
     """
