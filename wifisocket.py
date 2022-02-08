@@ -633,7 +633,7 @@ def send_password(password, time_=30):
         Default: 30 sec.
     """
     UDP_PORT = 49999
-    s = create_socket('None', broadcast=True)
+    s = create_socket(broadcast=True)
     address = ('255.255.255.255', UDP_PORT)
 
     len_ = len(password)
