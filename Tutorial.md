@@ -8,9 +8,9 @@ Download the `wifisocket.py` file and place it in the folder where your 3rd-part
 Python modules are located. In a usual Python installation on Windows, this would
 be something like `...\Python3x\Lib\site-packages`. Also, you need to install the
 `pycryptodome` package, which is required for writing and reading of encrypted
-socket data. Just do a `pip` installation:
+socket data. Just do a `pip` installation from the command line:
 
-    >>> pip install pycryptodome
+    $ pip install pycryptodome
     
 That's it!
 
@@ -64,13 +64,17 @@ Of course, you may hard-code the IP address also, but, as mentioned above, unles
 you have told your Wi-Fi router to give your sockets always the same IP address,
 it is very likely that the IP address may be different the next time you start
 your script or program.  
-Instead, you may want to fetch the IP address dynamically,
-and you can do this by using the `find_sockets()` function with the MAC address
-as keyword argument:
+Instead, you may want to fetch the IP address dynamically, and you can do this
+by using the `find_sockets()` function with the MAC address as keyword argument:
 
     >>> coffee_machine = ws.find_sockets(mac=coffee_machine_mac)
     >>> print(coffee_machine)
     Socket(mac='00aa11bb22cc', ip='192.167.0.100')
+
+`coffee_machine` does now contain a tuple of (MAC address, IP address), which can
+directly be used as 'socket' argument for most commands in this module.
+
+Repeat this procedure for the other sockets.
     
 ## Switching, Switch Status and Heartbeat
 Switching with the `switch(socket, on_off)` function has already been demonstrated
@@ -230,7 +234,7 @@ the absence mode and put everything back to 'normal':
     ...
     >>>
 
-## A small GUI program to switch your sockets manually
+## A small 'Switch' Program with Graphical User Interface
 In this last chapter, we write a small program with a graphical user interface
 (GUI) to switch your sockets. We use the Tk library which is included in Python:
 
@@ -246,9 +250,9 @@ We hard-code our socket data here, but this could also be put in (and read from)
 a file. Then we need to find the IP addresses:
 
 ```python
-# Socket data, keys are the MACs
+# Socket data, keys are the MACs. Replace data with your own set-up!
 socket_data = {
-    '00aa11bb22cc': {'name': 'Coffee_Machine'},
+    '00aa11bb22cc': {'name': 'Coffee Machine'},
     '00aa11bb44c0': {'name': 'Xmas Illumination'},
     '00aa11bb33ce': {'name': 'Dishwasher'}
 }
@@ -261,7 +265,7 @@ ws.timeout = 3
 ```
 
 Now let us set up a small GUI. We do this semi-automatically, but need therefore
-some global dictionaries to secure access to the added widgets:
+some global dictionaries to secure access to the added 'On' and 'Off' buttons:
 
 ```python
 # Set-up GUI
@@ -274,7 +278,7 @@ on_buttons = {}
 off_buttons = {}
 ```
 
-Next, we iterate through our sockets and add an 'on' and an 'off' button each:
+Next, we iterate through our sockets and add an 'On' and an 'Off' button each:
 
 ```python
 for key in socket_data:
@@ -289,7 +293,13 @@ for key in socket_data:
     temp_frame.pack(padx=2, pady=10)
     on_buttons[key].pack(side='left', padx=5, pady=5)
     off_buttons[key].pack(side='left', padx=5, pady=5)
-    
+```
+
+Depending on the switch state of the sockets, we deactivate the respective
+on/off buttons (e.g., if the switch is on, the 'On' button should be
+deactivated):
+
+```python
     if ws.switch_state((key, socket_data[key]['ip'])) == 'on':
         on_buttons[key].state(['disabled'])
         off_buttons[key].state(['!disabled'])
