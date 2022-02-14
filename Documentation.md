@@ -28,7 +28,6 @@ CMD_SET_AM = '09 \{active} \{from_:08x} \{to_:08x} 1E 0E 0E 0E 0E 0E 0E 0E 0E 0E
 CMD_DELETE_AM = '09 00 00 00 00 00 00 00 00 00 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E
 0E 0E 0E 0E'  
 CMD_HEARTBEAT = '61 55 93 26 54 04 04 04 04'  
-CMD_VERSION = '62 08 08 08 08 08 08 08 08'  
 
 ### Default Variables
 device = SWS_A1  
@@ -68,6 +67,7 @@ just a named tuple if the socket was defined by its MAC or IP address.
  
 ### **switch_slave(*socket_, slave, on_off*)**
 *Switch the slave socket on or off.*  
+
 To switch the radio-controlled 433 MHz slave sockets (e.g., ALDI Easy Home kit)
  >EXPERIMENTAL! I haven't tested this.
 
@@ -129,7 +129,7 @@ stands for a day in the week, starting on Monday. E.g.,
 `'0000000'`: never repeat, just switch today
 - **time_**: Time in **hh:mm** format, e.g., `'13:25'`.
 - **switch**: `'on'` or `'off'`
--delta_time**:Difference between the socket's time and the local time.  
+- **delta_time**: Difference between the socket's time and the local time.  
 The module assumes that the sockets are internally running UTC (GMT) time. The
 default setting corrects between your local time and UTC. If this is not correct,
 you can apply a different time difference (in seconds).
@@ -247,7 +247,3 @@ Note that the IP address of a socket may change (when dynamically assigned). Use
 `False` which means that commands are usually send to a given device, defined by
 its IP.
 *** 
-
-### **send_and_forget(*ip, command, broadcast=False*)**
-*Just send a command to a socket once, do nothing else.*
-***

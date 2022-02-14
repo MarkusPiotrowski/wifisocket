@@ -141,7 +141,7 @@ on or off.
 
 The `timer_query()` function has a `which` parameter, which can be used to filter
 the output list. E.g. `which=2` will only show the 2nd timer and `which='active'`
-will only show activated timers. `'free'` and `set` filter for empty timer slots
+will only show activated timers. `'free'` and `'set'` filter for empty timer slots
 or programmed timers, respectively. Some examples:
 
     >>> ws.timer_query(xmas_illum, which='Countdown')
@@ -154,7 +154,7 @@ or programmed timers, respectively. Some examples:
 Note the different return types. If you ask for a single timer, you only receive
 a *single tuple*, asking for free timers returns a *list of slot numbers* only
 (what else would you want to know here?), while the other filters (`'all'`, `'set'`
-and `'active'`) will return *a list of tuples*. 
+and `'active'`) will return *a list of tuples* (which, however, could be empty). 
 
 Before programming our socket, we delete the existing timers:
 
@@ -221,11 +221,12 @@ Then we set the absence mode and check if we set it properly:
     >>> ws.absence_mode_query(xmas_illlum)
     Absence(active=True, from_='04.02.2022 22:00', to_='07.02.2022 19:00')
 
-Note that we use the dd.mm.yyyy format for the date. All set, enjoy your holidays!
+Note that we use the dd.mm.yyyy format (day first, then month!) for the date.
+All set, enjoy your holidays!
 
 Due to bad weather, you decided to come back early. You wonder shortly about your
-Christmas illumination switching on and off before realizing that you should stop
-the absence mode and put everything back to 'normal':
+Christmas illumination switching on and off every 30 minutes before realizing
+that you should stop the absence mode and put everything back to 'normal':
 
     >>> ws.delete_absence_mode(xmas_illum)
     True
@@ -241,7 +242,6 @@ In this last chapter, we write a small program with a graphical user interface
 ```python
 import tkinter as tk
 import tkinter.ttk as ttk
-from tkinter import messagebox, simpledialog
 
 import wifisocket as ws
 ```
@@ -260,7 +260,7 @@ socket_data = {
 # Find IPs
 ws.timeout = 5  # may be useful to find all devices
 for key in socket_data:
-    socket_data[key]['ip'] = ws.find_sockets(key)
+    socket_data[key]['ip'] = ws.find_sockets(key).ip
 ws.timeout = 3
 ```
 

@@ -182,7 +182,7 @@ import datetime
 
 from collections import namedtuple
 
-from Crypto.Cipher import AES # Need to install 'pycryptodome' before
+from Crypto.Cipher import AES  # Need to install 'pycryptodome' before
 
 
 ###### CONSTANTS
@@ -196,7 +196,7 @@ DIS_120 = 'C2 11 92 DD'  # Aldi Easy Home
 U_DEVICE = 'CA A1 88 98'  # (To me) Unknown device
 
 # Commands
-CMD_INIT = '01 40 {mac} ' # 01: constant, 40: send
+CMD_INIT = '01 40 {mac} '  # 01: constant, 40: send
 CMD_HEADER = '00 {packet} {device} '
 
 CMD_SEARCH = '23 {mac} 02 02'
@@ -205,8 +205,10 @@ CMD_SWITCH = '01 {switch} 04 04 04 04'  # 00 00 FF FF: on, 00 00 00 FF: off
 CMD_GET_STATE = '02 00 00 00 00 04 04 04 04'
 
 CMD_TIMER_QUERY = '04 00 00 06 06 06 06 06 06'
-CMD_SET_TIMER = ('03 00 {timer} {repeat} {hour} {minute} {switch} '
-                 '0F 0F 0F 0F 0F 0F 0F 0F 0F 0F 0F 0F 0F 0F 0F')
+CMD_SET_TIMER = (
+    '03 00 {timer} {repeat} {hour} {minute} {switch} '
+    '0F 0F 0F 0F 0F 0F 0F 0F 0F 0F 0F 0F 0F 0F 0F'
+)
 CMD_DELETE_TIMER = '05 00 {timer:02x} 06 06 06 06 06 06'
 
 # EXPERIMENTAL! NOT TESTED!
@@ -216,17 +218,17 @@ CMD_SWITCH_SLAVE = '08 {slave} {switch} 04 04 04 04'  # switch: 60: on, 70: off
 CMD_AM_QUERY = '0A 08 08 08 08 08 08 08 08'
 CMD_SET_AM = (
     '09 {active} {from_:08x} {to_:08x} 1E '
-    '0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E')
+    '0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E'
+)
 CMD_DELETE_AM = (
     '09 00 00 00 00 00 00 00 00 00 0E '
-    '0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E')
+    '0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E 0E'
+)
 
 CMD_HEARTBEAT = '61 55 93 26 54 04 04 04 04'
-# CMD_HEARTBEAT = '61 {timestamp:08x} 04 04 04 04'  # in app: with timestamp
 
-CMD_VERSION = '62 08 08 08 08 08 08 08 08'  # get version/name
 
-###### DEFAULTS 
+###### DEFAULTS
 device = SWS_A1
 packet = 'FF FF'
 
@@ -259,15 +261,14 @@ def find_sockets(mac='FF FF FF FF FF FF', ip='255.255.255.255'):
     address = (ip, udp_port)
 
     cmd = assemble_command(mac, CMD_SEARCH.format(mac=mac))
-    send_command = bytes.fromhex(cmd)
-    s.sendto(send_command, address)
+    s.sendto(bytes.fromhex(cmd), address)
 
     while True:
         try:
             message = s.recv(1024)
         except socket.timeout:
             break
-        if (message[1] != 66 or len(message[9:]) % 16 != 0):
+        if len(message) != 57 or message[1] != 66:
             continue
         message = decrypt(message[9:])
         mac_ = message[12:18].hex()
@@ -275,7 +276,8 @@ def find_sockets(mac='FF FF FF FF FF FF', ip='255.255.255.255'):
         socket_data.append(Socket(mac_, ip_))
     s.close()
     if mac != 'FF FF FF FF FF FF' or ip != '255.255.255.255':
-        socket_data = socket_data[0]  # Don't need a list, just one socket
+        # Don't need a list, just one socket
+        socket_data = socket_data[0] if socket_data else None
     return socket_data
 
 
@@ -305,6 +307,7 @@ def switch_state(socket_):
     """
     mac, ip = socket_
     cmd = assemble_command(mac, CMD_GET_STATE)
+
     success, message = send(ip, cmd)
     if success:
         message = decrypt(message)
@@ -332,10 +335,12 @@ def switch_slave(socket_, slave, on_off):
     mac, ip = socket_
     if on_off == 'on':
         cmd = assemble_command(
-            mac, CMD_SWITCH_SLAVE.format(slave=slave, switch='60'))
+            mac, CMD_SWITCH_SLAVE.format(slave=slave, switch='60')
+        )
     elif on_off == 'off':
         cmd = assemble_command(
-            mac, CMD_SWITCH_SLAVE.format(slave=slave, switch='70'))
+            mac, CMD_SWITCH_SLAVE.format(slave=slave, switch='70')
+        )
 
     success, message = send(ip, cmd)
     if success:
@@ -384,10 +389,13 @@ def timer_query(socket_, which='all', delta_time=None):
     cmd = assemble_command(mac, CMD_TIMER_QUERY)
     success, message = send(ip, cmd)
     data = []
-    Timer = namedtuple('Timer', 'number active repeat time switch',
-                       defaults=('', '', ''))
-    
+    Timer = namedtuple(
+        'Timer', 'number active repeat time switch', defaults=('', '', '')
+    )
+
     if success:
+        if len(message) != 112:
+            return 'Bad return data'
         message = decrypt(message)
         m = message[9:]
         if not delta_time:
@@ -396,27 +404,30 @@ def timer_query(socket_, which='all', delta_time=None):
             number = m[n] if n < 80 else 'Countdown'  # Timer 11 is Countdown
             active = True if f'{m[n + 1]:08b}'[0] == '1' else False
             repeat = f'{m[n + 1]:08b}'[-1:0:-1]  # discard bit 1 and reverse
-            switch = 'on' if m[n+4:n+8].hex() == "0000ffff" else 'off'
+            switch = 'on' if m[n + 4 : n + 8].hex() == "0000ffff" else 'off'
             if m[n + 2] == 255:
                 time_ = None
             else:
                 hour, minute = f'{m[n + 2]} {m[n + 3]}'.split()
-                time_ = (datetime.datetime(1, 1, 2, int(hour), int(minute))
-                         - datetime.timedelta(seconds=delta_time))
+                time_ = datetime.datetime(
+                    1, 1, 2, int(hour), int(minute)
+                ) - datetime.timedelta(seconds=delta_time)
                 if number == 'Countdown':
                     now = datetime.datetime.now()
-                    time_ -= datetime.timedelta(hours=now.hour,
-                                                minutes=now.minute)
+                    time_ -= datetime.timedelta(
+                        hours=now.hour, minutes=now.minute
+                    )
                 hour, minute = time_.hour, time_.minute
                 time_ = f'{hour:02d}:{minute:02d}'
             if (
-                which == 'all' or which == number
+                which == 'all'
+                or which == number
                 or (which == 'active' and active)
                 or (which == 'set' and time_ != None)
-                or (which =='free' and time_ == None)
-                ):
+                or (which == 'free' and time_ == None)
+            ):
                 if time_ == None:
-                    if which =='free':
+                    if which == 'free':
                         data.append(number)
                     else:
                         data.append(Timer(number, None))
@@ -459,12 +470,12 @@ def set_timer(socket_, timer, active, repeat, time_, switch, delta_time=None):
         time_ = datetime.datetime.now()
         time_ += datetime.timedelta(hours=hour, minutes=minute)
         timer = 11
-        # Countdowns are always active and don't repeat: 
+        # Countdowns are always active and don't repeat:
         repeat = f'{int("10000000", 2):02x}'
     else:
         time_ = datetime.datetime(1, 1, 2, hour, minute)
     if not delta_time:
-            delta_time = time.timezone
+        delta_time = time.timezone
     time_ += datetime.timedelta(seconds=delta_time)
     hour, minute = f'{time_.hour:02x} {time_.minute:02x}'.split()
 
@@ -475,10 +486,10 @@ def set_timer(socket_, timer, active, repeat, time_, switch, delta_time=None):
     cmd = assemble_command(
         mac,
         CMD_SET_TIMER.format(
-            timer=timer, repeat=repeat, hour=hour,
-            minute=minute, switch=switch)
-        )
-    
+            timer=timer, repeat=repeat, hour=hour, minute=minute, switch=switch
+        ),
+    )
+
     success, message = send(ip, cmd)
     if success:
         return success
@@ -542,12 +553,14 @@ def absence_mode_query(socket_):
     """
     mac, ip = socket_
     cmd = assemble_command(mac, CMD_AM_QUERY)
+
     success, message = send(ip, cmd)
     if success:
         message = decrypt(message)[7:]
         on = True if message[1] == 128 else False
-        Absence = namedtuple('Absence', 'active from_ to_',
-                             defaults=(None, None))
+        Absence = namedtuple(
+            'Absence', 'active from_ to_', defaults=(None, None)
+        )
         if on:
             timestamp = int.from_bytes(message[2:6], byteorder='big')
             date = datetime.datetime.fromtimestamp(timestamp)
@@ -567,7 +580,7 @@ def set_absence_mode(socket_, active, from_, to_):
 
     In absence (or antithief) mode the socket switches on and off every
     30 minutes.
-    
+
     :socket_: A tuple of (MAC address, IP address) of the Wi-Fi socket.
     :active: `True` or `False` to activate absence mode. Actually, this
         parameter doesn't make too much sense, because the whole command
@@ -586,7 +599,8 @@ def set_absence_mode(socket_, active, from_, to_):
     except Exception as e:
         return e
     cmd = assemble_command(
-            mac, CMD_SET_AM.format(active=active, from_=from_, to_=to_))
+        mac, CMD_SET_AM.format(active=active, from_=from_, to_=to_)
+    )
 
     success, message = send(ip, cmd)
     if success:
@@ -602,6 +616,7 @@ def delete_absence_mode(socket_):
     """
     mac, ip = socket_
     cmd = assemble_command(mac, CMD_DELETE_AM)
+
     success, message = send(ip, cmd)
     if success:
         return True
@@ -615,7 +630,8 @@ def heartbeat(socket_):
     :socket_: A tuple of (MAC address, IP address) of the Wi-Fi socket."""
     mac, ip = socket_
     cmd = assemble_command(mac, CMD_HEARTBEAT)
-    success, message = send(ip, cmd)  
+
+    success, message = send(ip, cmd)
     if success:
         return True
     else:
@@ -627,7 +643,7 @@ def send_password(password, time_=30):
 
     Press the on/off button of the socket for 5 seconds until the LED starts
     flashing red quickly. Then use this command.
-    
+
     :password: The password of the wireless network.
     :time_: Duration (in seconds) how long the process should proceed.
         Default: 30 sec.
@@ -679,20 +695,22 @@ def send_password(password, time_=30):
 
 ###### Helper functions, consider them 'PRIVAT'
 
+
 def assemble_command(mac, command):
-    """Assemble a valid command from different parts and return it.""" 
+    """Assemble a valid command from different parts and return it."""
     uncrypted_part = CMD_INIT.format(mac=mac)
     header = CMD_HEADER.format(packet=packet, device=device)
     crypted_part = encrypt(bytes.fromhex(header + command))
     return (
         uncrypted_part
         + len(crypted_part).to_bytes(1, 'big').hex()
-        + crypted_part.hex())    
+        + crypted_part.hex()
+    )
 
 
 def encrypt(command):
     """Encrypt the command with AES/CBC."""
-    cipher =AES.new(PASSKEY, AES.MODE_CBC, iv=INITIALIZATION_VECTOR)
+    cipher = AES.new(PASSKEY, AES.MODE_CBC, iv=INITIALIZATION_VECTOR)
     return cipher.encrypt(command)
 
 
@@ -710,7 +728,7 @@ def create_socket(my_ip=my_ip, broadcast=False):
                 automatically set to `'255.255.255.255'`. Default: `False`.
 
     Note that the IP address of a socket may change (when dynamically assigned).
-    Use `find_sockets(mac)` to get the IP address of a certain device. 
+    Use `find_sockets(mac)` to get the IP address of a certain device.
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     if broadcast:
@@ -750,7 +768,7 @@ def send(ip, command, broadcast=False):
         except socket.timeout:
             message = 'Timeout'
             continue
-        if (message[1] != 66 or len(message[9:]) % 16 != 0):
+        if len(message) < 25 or message[1] != 66 or len(message[9:]) % 16 != 0:
             message = 'Bad return data'
             time.sleep(0.5)
             continue
@@ -758,14 +776,3 @@ def send(ip, command, broadcast=False):
         return True, message[9:]
     s.close()
     return False, message
-
-
-def send_and_forget(ip, command, broadcast=False):
-    """Just send a command to a socket once, do nothing else."""
-    if broadcast:
-        s = create_socket(broadcast)
-        ip = '255.255.255.255'
-    else:
-        s = create_socket()
-    s.sendto(bytes.fromhex(command), (ip, udp_port))
-    s.close()
