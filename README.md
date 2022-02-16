@@ -93,7 +93,7 @@ over them, therefore, they have been coded as default variables, which could be
 set by the user:
 
     >>> import wifisocket as ws
-    >>> ws.device = ws.DIS_120  # Aldi Easy Home Wi-Fi adapter
+    >>> ws.device = ws.DIS_124  # Aldi Easy Home Wi-Fi adapter
 
 These are the default global variables:
 
