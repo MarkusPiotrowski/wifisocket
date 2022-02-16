@@ -110,7 +110,7 @@ to have control over them, therefore, they have been coded as default
 variables, which could be set by the user:
 
     >>> import wifisocket as ws
-    >>> ws.device = ws.DIS_120  # Aldi Easy Home Wi-Fi adapter
+    >>> ws.device = ws.DIS_124  # Aldi Easy Home Wi-Fi adapter
 
 These are the default global variables:
 
@@ -192,7 +192,7 @@ INITIALIZATION_VECTOR = PASSKEY
 
 # Device codes
 SWS_A1 = 'C1 11 71 50'  # Silvercrest, sold by Lidl
-DIS_120 = 'C2 11 92 DD'  # Aldi Easy Home
+DIS_124 = 'C2 11 92 DD'  # Aldi Easy Home
 U_DEVICE = 'CA A1 88 98'  # (To me) Unknown device
 
 # Commands

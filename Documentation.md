@@ -8,7 +8,7 @@ INITIALIZATION_VECTOR = PASSKEY
 
 #### Device Codes
 SWS_A1 = 'C1 11 71 50'  
-DIS_120 = 'C2 11 92 DD'  
+DIS_124 = 'C2 11 92 DD'  
 U_DEVICE = 'CA A1 88 98'  # Unknown device
 
 #### Commands
