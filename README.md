@@ -1,7 +1,7 @@
 # Module to control the Silvercrest SWS-A1 Wi-Fi sockets
 This module provides functions to control the Silvercrest SWS-A1 Wi-Fi sockets
 (sold 2016 by Lidl) and similar devices sold by other vendors, e.g., the Aldi
-Easy Home DIS-120.
+Easy Home DIS-124.
 
 The sockets are controlled by sending commands with UDP using the local wireless
 network. For correct addressing, the IP address of the socket must be known (you
