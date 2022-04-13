@@ -399,7 +399,10 @@ def timer_query(socket_, which='all', delta_time=None):
         message = decrypt(message)
         m = message[9:]
         if not delta_time:
-            delta_time = time.timezone
+             if time.localtime().tm_isdst:  # Dayligth saving time (Sommerzeit)
+                delta_time = time.altzone
+            else:
+                delta_time = time.timezone
         for n in range(0, 88, 8):  # Rest of message are just padding bytes
             number = m[n] if n < 80 else 'Countdown'  # Timer 11 is Countdown
             active = True if f'{m[n + 1]:08b}'[0] == '1' else False
@@ -475,7 +478,10 @@ def set_timer(socket_, timer, active, repeat, time_, switch, delta_time=None):
     else:
         time_ = datetime.datetime(1, 1, 2, hour, minute)
     if not delta_time:
-        delta_time = time.timezone
+        if time.localtime().tm_isdst:  # Dayligth saving time (Sommerzeit)
+            delta_time = time.altzone
+        else:
+            delta_time = time.timezone
     time_ += datetime.timedelta(seconds=delta_time)
     hour, minute = f'{time_.hour:02x} {time_.minute:02x}'.split()
 
