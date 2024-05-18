@@ -1,5 +1,5 @@
 # wifisocket.py
-# Copyright 2022, Markus Piotrowski
+# Copyright 2022, 2024 Markus Piotrowski
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -139,7 +139,7 @@ Available commands
 ------------------
 Use these commands to control your sockets:
 
-    :switch(socket, on_off): To switch a socket 'on' or 'off'. 
+    :switch(socket, on_off): To switch a socket 'on' or 'off'.
     :switch_state(socket): Returns 'on' or 'off'.
     :switch_slave(socket, slave, on_off): To switch a radio-controlled
         slave socket. Not tested!
@@ -233,11 +233,10 @@ device = SWS_A1
 packet = 'FF FF'
 
 udp_port = 8530
+my_ip = None
 timeout = 2
 
 repeat = 3
-
-my_ip = socket.gethostname()
 
 
 def find_sockets(mac='FF FF FF FF FF FF', ip='255.255.255.255'):
@@ -382,7 +381,8 @@ def timer_query(socket_, which='all', delta_time=None):
         `'0000000'`: never repeat, just switch today
     :time: When to switch, in 24-hour format (hh:mm). Note: This modul assumes
         that the sockest are using UTC internally and corrects this to local
-        time. If this is not correct, use the 'time_delta' argument (see above).
+        time. If this is not correct, use the 'time_delta' argument (see
+        above).
     :switch: What to do. Switch `'on'` or `'off'`.
     """
     mac, ip = socket_
@@ -399,7 +399,7 @@ def timer_query(socket_, which='all', delta_time=None):
         message = decrypt(message)
         m = message[9:]
         if not delta_time:
-             if time.localtime().tm_isdst:  # Dayligth saving time (Sommerzeit)
+            if time.localtime().tm_isdst:  # Dayligth saving time (Sommerzeit)
                 delta_time = time.altzone
             else:
                 delta_time = time.timezone
@@ -426,10 +426,10 @@ def timer_query(socket_, which='all', delta_time=None):
                 which == 'all'
                 or which == number
                 or (which == 'active' and active)
-                or (which == 'set' and time_ != None)
-                or (which == 'free' and time_ == None)
+                or (which == 'set' and time_ is not None)
+                or (which == 'free' and time_ is None)
             ):
-                if time_ == None:
+                if time_ is None:
                     if which == 'free':
                         data.append(number)
                     else:
@@ -702,6 +702,30 @@ def send_password(password, time_=30):
 ###### Helper functions, consider them 'PRIVAT'
 
 
+def get_local_ip():
+    """Find and return the local IP address of this computer.
+
+    Some hack by "fatal_error" on StackOverflow:
+    https://stackoverflow.com/questions/166506/
+    finding-local-ip-addresses-using-pythons-stdlib
+
+    Usually, the local IP is set during immport of this module.
+    You may use this function to change the local IP (`my_ip`)
+    if your computer changes the WiFi net.
+    """
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(0)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        local_ip = s.getsockname()[0]
+    except Exception:
+        local_ip = '127.0.0.1'
+    finally:
+        s.close()
+    return local_ip
+
+
 def assemble_command(mac, command):
     """Assemble a valid command from different parts and return it."""
     uncrypted_part = CMD_INIT.format(mac=mac)
@@ -726,16 +750,21 @@ def decrypt(message):
     return cipher.decrypt(message)
 
 
-def create_socket(my_ip=my_ip, broadcast=False):
+def create_socket(broadcast=False):
     """Create an internet socket for UDP communication to (real) sockets.
 
     :broadcast: Set to `True` if the socket is for broadcasting UDP to all
                 listening devices. If broadcast is `True`, the IP address is
                 automatically set to `'255.255.255.255'`. Default: `False`.
 
-    Note that the IP address of a socket may change (when dynamically assigned).
+    Note that the IP address of a socket may change (when dynamically
+    assigned).
     Use `find_sockets(mac)` to get the IP address of a certain device.
     """
+    global my_ip
+    if my_ip is None:
+        my_ip = get_local_ip()
+
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     if broadcast:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
