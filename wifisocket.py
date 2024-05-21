@@ -233,7 +233,7 @@ device = SWS_A1
 packet = 'FF FF'
 
 udp_port = 8530
-my_ip = None
+local_ip = None
 timeout = 2
 
 repeat = 3
@@ -709,9 +709,10 @@ def get_local_ip():
     https://stackoverflow.com/questions/166506/
     finding-local-ip-addresses-using-pythons-stdlib
 
-    Usually, the local IP is set during immport of this module.
-    You may use this function to change the local IP (`my_ip`)
-    if your computer changes the WiFi net.
+    Usually, the local IP is read once after import during the first
+    contact to a power socket.
+    You may use this function to change the local IP (`local_ip`)
+    if your computer changes the Wi-Fi net.
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.settimeout(0)
@@ -761,22 +762,22 @@ def create_socket(broadcast=False):
     assigned).
     Use `find_sockets(mac)` to get the IP address of a certain device.
     """
-    global my_ip
-    if my_ip is None:
-        my_ip = get_local_ip()
+    global local_ip
+    if local_ip is None:
+        local_ip = get_local_ip()
 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     if broadcast:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     s.settimeout(timeout)
-    s.bind((my_ip, udp_port))
+    s.bind((local_ip, udp_port))
     return s
 
 
 def send(ip, command, broadcast=False):
     """Send a command to a socket, receive and return the answer.
 
-    :ip: The IP address of teh device, given as dot-separated string.
+    :ip: The IP address of the device, given as dot-separated string.
         Note that the IP address of a socket may change (when dynamically
         assigned). Use `find_sockets(mac)` to get the IP address of a
         certain device.
